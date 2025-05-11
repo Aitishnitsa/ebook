@@ -5,15 +5,15 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export default defineConfig({
-  base: '/ebook/', 
+  base: '/ebook/',
   plugins: [react()],
   server: {
     proxy: {
       '/api': {
-        target: process.env.VITE_API_URL,
+        target: process.env.VITE_API_URL || import.meta.env.VITE_API_URL,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },
-})
+});
