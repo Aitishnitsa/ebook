@@ -7,7 +7,7 @@ function App() {
 
   useEffect(() => {
     axios
-      .get('/api/users')
+      .get(`${import.meta.env.VITE_API_URL}/users`)
       .then((response) => {
         console.log('Fetched users:', response.data);
         setUsers(response.data);
@@ -15,12 +15,12 @@ function App() {
       .catch((error) => {
         console.error('Error fetching users:', error);
       });
-  }, [localUsers]);
+  }, [localUsers]);  
 
   const handleCreateUser = () => {
     const newUser = { id: Date.now(), username, email };
     axios
-      .post('/api/users', newUser)
+      .post(`${import.meta.env.VITE_API_URL}/users`, newUser)
       .then((response) => {
         console.log('User created:', response.data);
         setLocalUsers((prevLocalUsers) => [...prevLocalUsers, response.data]);
