@@ -9,6 +9,7 @@ function App() {
   const [editingUser, setEditingUser] = useState(null);
   const [editUsername, setEditUsername] = useState('');
   const [editEmail, setEditEmail] = useState('');
+  const [userCount, setUserCount] = useState(null);
 
   useEffect(() => {
     axios
@@ -68,9 +69,27 @@ function App() {
       });
   };
 
+  const handleGetUserCount = () => {
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/users/count`)
+      .then((response) => {
+        setUserCount(response.data.count);
+      })
+      .catch((error) => {
+        console.error('Error fetching user count:', error);
+        setUserCount('Error');
+      });
+  };
+
   return (
     <div>
       <h1>Users</h1>
+      <button onClick={handleGetUserCount}>Get User Count</button>
+      {userCount !== null && (
+        <div>
+          <strong>User Count:</strong> {userCount}
+        </div>
+      )}
       <ul>
         {users.map((user) =>
           editingUser === user.id ? (
