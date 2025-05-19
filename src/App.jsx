@@ -81,56 +81,99 @@ function App() {
       });
   };
 
-  return (
-    <div>
-      <h1>Users</h1>
-      <button onClick={handleGetUserCount}>Get User Count</button>
-      {userCount !== null && (
-        <div>
-          <strong>User Count:</strong> {userCount}
-        </div>
-      )}
-      <ul>
+  return (<>
+    <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-10">
+      <h1 className="text-3xl font-bold mb-6 text-center">Users</h1>
+      <div className="flex justify-between items-center mb-4">
+        <button
+          className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          onClick={handleGetUserCount}
+        >
+          Get User Count
+        </button>
+        {userCount !== null && (
+          <div className="text-gray-700">
+            <strong>User Count:</strong> {userCount}
+          </div>
+        )}
+      </div>
+      <ul className="space-y-3 mb-8">
         {users.map((user) =>
           editingUser === user.id ? (
-            <li key={user.id}>
+            <li key={user.id} className="flex items-center space-x-2">
               <input
                 type="text"
+                className="border rounded px-2 py-1 flex-1"
                 value={editUsername}
                 onChange={(e) => setEditUsername(e.target.value)}
               />
               <input
                 type="email"
+                className="border rounded px-2 py-1 flex-1"
                 value={editEmail}
                 onChange={(e) => setEditEmail(e.target.value)}
               />
-              <button onClick={() => handleUpdateUser(user.id)}>Save</button>
-              <button onClick={() => setEditingUser(null)}>Cancel</button>
+              <button
+                className="cursor-pointer bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
+                onClick={() => handleUpdateUser(user.id)}
+              >
+                Save
+              </button>
+              <button
+                className="cursor-pointer bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition"
+                onClick={() => setEditingUser(null)}
+              >
+                Cancel
+              </button>
             </li>
           ) : (
-            <li key={user.id}>
-              {user.username} ({user.email})
-              <button onClick={() => handleEditClick(user)}>Edit</button>
-              <button onClick={() => handleDeleteUser(user.id)}>Delete</button>
+            <li key={user.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+              <span>
+                <span className="font-medium">{user.username}</span> <span className="text-gray-500">({user.email})</span>
+              </span>
+              <div className="space-x-2">
+                <button
+                  className="cursor-pointer bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 transition"
+                  onClick={() => handleEditClick(user)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="cursor-pointer bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                  onClick={() => handleDeleteUser(user.id)}
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           )
         )}
       </ul>
-      <h2>Create User</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <button onClick={handleCreateUser}>Create User</button>
+      <h2 className="text-xl font-semibold mb-3">Create User</h2>
+      <div className="flex space-x-2 mb-4">
+        <input
+          type="text"
+          placeholder="Username"
+          className="border rounded px-2 py-1 flex-1"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          className="border rounded px-2 py-1 flex-1"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <button
+          className="cursor-pointer bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
+          onClick={handleCreateUser}
+        >
+          Create User
+        </button>
+      </div>
     </div>
+  </>
   );
 }
 
