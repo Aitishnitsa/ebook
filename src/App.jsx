@@ -3,7 +3,6 @@ import axios from 'axios';
 
 function App() {
   const [users, setUsers] = useState([]);
-  const [localUsers, setLocalUsers] = useState([]);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [editingUser, setEditingUser] = useState(null);
@@ -12,23 +11,32 @@ function App() {
   const [userCount, setUserCount] = useState(null);
 
   useEffect(() => {
+    const cachedUsers = localStorage.getItem('users');
+    if (cachedUsers) {
+      setUsers(JSON.parse(cachedUsers));
+    }
     axios
       .get(`${import.meta.env.VITE_API_URL}/users`)
       .then((response) => {
         setUsers(response.data);
+        localStorage.setItem('users', JSON.stringify(response.data));
       })
       .catch((error) => {
         console.error('Error fetching users:', error);
       });
-  }, [localUsers]);
+  }, []);
 
   const handleCreateUser = () => {
+    if (!username || !email) return;
     const newUser = { id: Date.now(), username, email };
     axios
       .post(`${import.meta.env.VITE_API_URL}/users`, newUser)
       .then((response) => {
-        setLocalUsers((prevLocalUsers) => [...prevLocalUsers, response.data]);
-        setUsers((prevUsers) => [...prevUsers, response.data]);
+        setUsers((prevUsers) => {
+          const updatedUsers = [...prevUsers, response.data];
+          localStorage.setItem('users', JSON.stringify(updatedUsers));
+          return updatedUsers;
+        });
         setUsername('');
         setEmail('');
       })
@@ -48,9 +56,11 @@ function App() {
     axios
       .put(`${import.meta.env.VITE_API_URL}/users/${userId}`, updatedUser)
       .then((response) => {
-        setUsers((prevUsers) =>
-          prevUsers.map((u) => (u.id === userId ? response.data : u))
-        );
+        setUsers((prevUsers) => {
+          const updatedUsers = prevUsers.map((u) => (u.id === userId ? response.data : u));
+          localStorage.setItem('users', JSON.stringify(updatedUsers));
+          return updatedUsers;
+        });
         setEditingUser(null);
       })
       .catch((error) => {
@@ -62,7 +72,11 @@ function App() {
     axios
       .delete(`${import.meta.env.VITE_API_URL}/users/${userId}`)
       .then(() => {
-        setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userId));
+        setUsers((prevUsers) => {
+          const updatedUsers = prevUsers.filter((u) => u.id !== userId);
+          localStorage.setItem('users', JSON.stringify(updatedUsers));
+          return updatedUsers;
+        });
       })
       .catch((error) => {
         console.error('Error deleting user:', error);
@@ -81,7 +95,7 @@ function App() {
       });
   };
 
-  return (<>
+  return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-10">
       <h1 className="text-3xl font-bold mb-6 text-center">Users</h1>
       <div className="flex justify-between items-center mb-4">
@@ -100,16 +114,16 @@ function App() {
       <ul className="space-y-3 mb-8">
         {users.map((user) =>
           editingUser === user.id ? (
-            <li key={user.id} className="flex items-center space-x-2">
+            <li key={user.id} className="w-full flex items-center space-x-2 justify-between bg-gray-100 p-2 rounded">
               <input
                 type="text"
-                className="border rounded px-2 py-1 flex-1"
+                className="border rounded px-2 py-1 w-1/3"
                 value={editUsername}
                 onChange={(e) => setEditUsername(e.target.value)}
               />
               <input
                 type="email"
-                className="border rounded px-2 py-1 flex-1"
+                className="border rounded px-2 py-1 w-1/3"
                 value={editEmail}
                 onChange={(e) => setEditEmail(e.target.value)}
               />
@@ -173,7 +187,6 @@ function App() {
         </button>
       </div>
     </div>
-  </>
   );
 }
 
