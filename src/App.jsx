@@ -8,7 +8,7 @@ import Reader from "./pages/Reader.jsx";
 function App() {
   return (
     <>
-      <BrowserRouter basename="/ebook">
+      <BrowserRouter basename="/ebook/">
         <Nav />
         <Routes>
           <Route path="/" element={<Navigate to="/admin" />} />
