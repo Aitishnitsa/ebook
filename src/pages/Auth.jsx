@@ -27,9 +27,7 @@ function Auth({ onAuth }) {
         setSuccess(true);
         localStorage.setItem('user', JSON.stringify(response.data));
         onAuth && onAuth(response.data);
-        // Move to login panel after registration
         setIsRegistering(false);
-        setSuccess(false);
         setPassword('');
         setError('');
       } else {
@@ -44,15 +42,15 @@ function Auth({ onAuth }) {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           }
         );
-        const { access_token } = response.data;
+        const { access_token, refresh_token } = response.data;
         localStorage.setItem('access_token', access_token);
+        localStorage.setItem('refresh_token', refresh_token);
         const userResponse = await axios.get(`${import.meta.env.VITE_API_URL}/users/me`, {
           headers: { Authorization: `Bearer ${access_token}` },
         });
         localStorage.setItem('user', JSON.stringify(userResponse.data));
         setSuccess(true);
         onAuth && onAuth(userResponse.data);
-        // Redirect to /profile after successful login
         navigate('/profile');
       }
     } catch (err) {

@@ -117,28 +117,34 @@ const AdminPanel = () => {
                         <li key={user.id} className="w-full flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 justify-between bg-gray-100 p-2 rounded">
                             <input
                                 type="text"
-                                className="border rounded px-2 py-1 w-full sm:w-1/3"
+                                className="border rounded px-2 py-1 w-full sm:w-1/3 flex-1"
                                 value={editUsername}
                                 onChange={(e) => setEditUsername(e.target.value)}
                             />
                             <input
                                 type="email"
-                                className="border rounded px-2 py-1 w-full sm:w-1/3"
+                                className="border rounded px-2 py-1 w-full sm:w-1/3 flex-1"
                                 value={editEmail}
                                 onChange={(e) => setEditEmail(e.target.value)}
                             />
                             <div className="flex gap-2">
                                 <button
-                                    className="cursor-pointer bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
+                                    className="cursor-pointer bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition flex items-center justify-center"
                                     onClick={() => handleUpdateUser(user.id)}
+                                    title="Save"
                                 >
-                                    Save
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
                                 </button>
                                 <button
-                                    className="cursor-pointer bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition"
+                                    className="cursor-pointer bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition flex items-center justify-center"
                                     onClick={() => setEditingUser(null)}
+                                    title="Cancel"
                                 >
-                                    Cancel
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
                                 </button>
                             </div>
                         </li>

@@ -11,7 +11,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access_token'));
 
   const handleAuth = () => {
-    setIsAuthenticated(true); // Update authentication state
+    setIsAuthenticated(true);
   };
 
   return (
