@@ -1,86 +1,67 @@
 import axios from 'axios';
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
-api.interceptors.request.use(
-  (config) => {
-    const access_token = localStorage.getItem('access_token');
-    if (access_token) {
-      const decoded = jwtDecode(access_token);
-      const isAccessTokenExpired = decoded.exp * 1000 < Date.now();
-
-      if (isAccessTokenExpired) {
-        const refresh_token = localStorage.getItem('refresh_token');
-        if (refresh_token) {
-          const decodedRefresh = jwtDecode(refresh_token);
-          const isRefreshTokenExpired = decodedRefresh.exp * 1000 < Date.now();
-
-          if (isRefreshTokenExpired) {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            localStorage.removeItem('user');
-            window.location.href = '/auth';
-            return Promise.reject(new Error('Both tokens expired. Logging out.'));
-          }
-        }
-      }
-
-      config.headers.Authorization = `Bearer ${access_token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
 let isRefreshing = false;
 let failedQueue = [];
 
+const logout = () => {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  localStorage.removeItem('user');
+  window.location.href = '/auth';
+};
+
 const processQueue = (error, token = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
+  failedQueue.forEach(prom => {
+    error ? prom.reject(error) : prom.resolve(token);
   });
   failedQueue = [];
 };
 
+api.interceptors.request.use(config => {
+  const access_token = localStorage.getItem('access_token');
+  if (access_token) {
+    config.headers.Authorization = `Bearer ${access_token}`;
+  }
+  return config;
+});
+
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  res => res,
+  async error => {
     const originalRequest = error.config;
     if (
       error.response &&
       error.response.status === 401 &&
       !originalRequest._retry
     ) {
+      const refresh_token = localStorage.getItem('refresh_token');
+      if (!refresh_token) {
+        logout();
+        return Promise.reject(error);
+      }
+
+      const decodedRefresh = jwtDecode(refresh_token);
+      if (decodedRefresh.exp * 1000 < Date.now()) {
+        logout();
+        return Promise.reject(new Error('Refresh token expired'));
+      }
+
       if (isRefreshing) {
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers['Authorization'] = 'Bearer ' + token;
-            return api(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
+        }).then(token => {
+          originalRequest.headers.Authorization = 'Bearer ' + token;
+          return api(originalRequest);
+        });
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
-
-      const refresh_token = localStorage.getItem('refresh_token');
-      if (!refresh_token) {
-        isRefreshing = false;
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user');
-        window.location.href = '/auth';
-        return Promise.reject(error);
-      }
 
       try {
         const response = await axios.post(
@@ -89,15 +70,12 @@ api.interceptors.response.use(
         );
         const { access_token } = response.data;
         localStorage.setItem('access_token', access_token);
-        api.defaults.headers.common['Authorization'] = 'Bearer ' + access_token;
         processQueue(null, access_token);
+        originalRequest.headers.Authorization = 'Bearer ' + access_token;
         return api(originalRequest);
       } catch (err) {
         processQueue(err, null);
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user');
-        window.location.href = '/auth';
+        logout();
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

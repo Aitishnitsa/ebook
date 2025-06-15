@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 
 function Auth({ onAuth }) {
   const [email, setEmail] = useState('');
@@ -19,7 +19,7 @@ function Auth({ onAuth }) {
 
     try {
       if (isRegistering) {
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}/register`, {
+        const response = await api.post('/register', {
           username,
           email,
           password,
@@ -35,17 +35,13 @@ function Auth({ onAuth }) {
         params.append('grant_type', 'password');
         params.append('username', username);
         params.append('password', password);
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/token`,
-          params,
-          {
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          }
-        );
+        const response = await api.post('/token', params, {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        });
         const { access_token, refresh_token } = response.data;
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
-        const userResponse = await axios.get(`${import.meta.env.VITE_API_URL}/users/me`, {
+        const userResponse = await api.get('/users/me', {
           headers: { Authorization: `Bearer ${access_token}` },
         });
         localStorage.setItem('user', JSON.stringify(userResponse.data));

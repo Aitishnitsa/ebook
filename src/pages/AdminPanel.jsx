@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 
 const AdminPanel = () => {
     const [users, setUsers] = useState([]);
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
     const [editingUser, setEditingUser] = useState(null);
     const [editUsername, setEditUsername] = useState('');
     const [editEmail, setEditEmail] = useState('');
@@ -15,8 +13,8 @@ const AdminPanel = () => {
         if (cachedUsers) {
             setUsers(JSON.parse(cachedUsers));
         }
-        axios
-            .get(`${import.meta.env.VITE_API_URL}/users`)
+        api
+            .get('/users')
             .then((response) => {
                 setUsers(response.data);
                 localStorage.setItem('users', JSON.stringify(response.data));
@@ -26,25 +24,6 @@ const AdminPanel = () => {
             });
     }, []);
 
-    const handleCreateUser = () => {
-        if (!username || !email) return;
-        const newUser = { id: Date.now(), username, email };
-        axios
-            .post(`${import.meta.env.VITE_API_URL}/users`, newUser)
-            .then((response) => {
-                setUsers((prevUsers) => {
-                    const updatedUsers = [...prevUsers, response.data];
-                    localStorage.setItem('users', JSON.stringify(updatedUsers));
-                    return updatedUsers;
-                });
-                setUsername('');
-                setEmail('');
-            })
-            .catch((error) => {
-                console.error('Error creating user:', error);
-            });
-    };
-
     const handleEditClick = (user) => {
         setEditingUser(user.id);
         setEditUsername(user.username);
@@ -53,8 +32,8 @@ const AdminPanel = () => {
 
     const handleUpdateUser = (userId) => {
         const updatedUser = { id: userId, username: editUsername, email: editEmail };
-        axios
-            .put(`${import.meta.env.VITE_API_URL}/users/${userId}`, updatedUser)
+        api
+            .put(`/users/${userId}`, updatedUser)
             .then((response) => {
                 setUsers((prevUsers) => {
                     const updatedUsers = prevUsers.map((u) => (u.id === userId ? response.data : u));
@@ -69,8 +48,8 @@ const AdminPanel = () => {
     };
 
     const handleDeleteUser = (userId) => {
-        axios
-            .delete(`${import.meta.env.VITE_API_URL}/users/${userId}`)
+        api
+            .delete(`/users/${userId}`)
             .then(() => {
                 setUsers((prevUsers) => {
                     const updatedUsers = prevUsers.filter((u) => u.id !== userId);
@@ -84,8 +63,8 @@ const AdminPanel = () => {
     };
 
     const handleGetUserCount = () => {
-        axios
-            .get(`${import.meta.env.VITE_API_URL}/users/count`)
+        api
+            .get('/users/count')
             .then((response) => {
                 setUserCount(response.data.count);
             })
