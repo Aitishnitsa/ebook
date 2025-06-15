@@ -167,29 +167,6 @@ const AdminPanel = () => {
                     )
                 )}
             </ul>
-            <h2 className="text-xl font-semibold mb-3">Create User</h2>
-            <div className="flex space-x-2 mb-4">
-                <input
-                    type="text"
-                    placeholder="Username"
-                    className="border rounded px-2 py-1 flex-1"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-                <input
-                    type="email"
-                    placeholder="Email"
-                    className="border rounded px-2 py-1 flex-1"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-                <button
-                    className="cursor-pointer bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
-                    onClick={handleCreateUser}
-                >
-                    Create User
-                </button>
-            </div>
         </div>
     );
 }
