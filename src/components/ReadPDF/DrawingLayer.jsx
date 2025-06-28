@@ -1,11 +1,11 @@
 import { useRef, useEffect } from "react";
 
 export const DrawingLayer = ({
-                                 isEnabled = true,
-                                 color = "#000000",
-                                 isErasing = false,
-                                 brushSize = 5
-                             }) => {
+    isEnabled = true,
+    color = "#000000",
+    isErasing = false,
+    brushSize = 5,
+}) => {
     const canvasRef = useRef(null);
     const containerRef = useRef(null);
     const ctxRef = useRef(null);
@@ -39,7 +39,7 @@ export const DrawingLayer = ({
             const rect = canvas.getBoundingClientRect();
             return {
                 x: e.clientX - rect.left,
-                y: e.clientY - rect.top
+                y: e.clientY - rect.top,
             };
         };
 
@@ -89,7 +89,7 @@ export const DrawingLayer = ({
     }, [color, isErasing, brushSize]);
 
     return (
-        <div ref={containerRef} className={`absolute top-0 left-0 w-full h-full pointer-events-none ${isEnabled ? "z-10" : "-z-10"}`}>
+        <div ref={containerRef} className={`absolute top-0 left-0 w-full h-full pointer-events-none z-10 ${isEnabled ? "z-10" : "-z-10"}`}>
             <canvas
                 ref={canvasRef}
                 className="w-full h-full pointer-events-auto"

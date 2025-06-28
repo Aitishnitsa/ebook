@@ -26,12 +26,20 @@ const Nav = ({ isAuth, onLogout }) => {
                             Home
                         </button>
                     </li>
-                    <li className="mx-3">
+                    {/* <li className="mx-3">
                         <button
                             onClick={() => navigate('/admin')}
                             className="text-white hover:text-gray-300 bg-transparent border-none cursor-pointer"
                         >
                             Admin
+                        </button>
+                    </li> */}
+                    <li className="mx-3">
+                        <button
+                            onClick={() => navigate('/reader')}
+                            className="text-white hover:text-gray-300 bg-transparent border-none cursor-pointer"
+                        >
+                            Reader
                         </button>
                     </li>
                     <li className="mx-3">
