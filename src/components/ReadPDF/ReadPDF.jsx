@@ -14,7 +14,7 @@ export const ReadPDF = () => {
     const [isDrawingEnabled, setIsDrawingEnabled] = useState(false);
     const [isErasing, setIsErasing] = useState(false);
     const [color, setColor] = useState("#000000");
-    const [brushSize, setBrushSize] = useState(5);
+    const [brushSize, setBrushSize] = useState(2);
     const [isSharedMode, setIsSharedMode] = useState(false);
     const [isTextToSpeechEnabled, setIsTextToSpeechEnabled] = useState(false);
     const [isVoiceTrackingEnabled, setIsVoiceTrackingEnabled] = useState(false); // Голосове читання користувача
@@ -33,7 +33,7 @@ export const ReadPDF = () => {
     };
 
     return (
-        <div className="relative w-full h-[92vh] flex flex-row justify-between p-4">
+        <div className="relative w-full sm:h-[92vh] h-[90vh] flex flex-row justify-between">
             {/* Панель інструментів */}
             <div className="flex flex-row items-center justify-between mb-4">
                 <input
@@ -43,11 +43,11 @@ export const ReadPDF = () => {
                     onChange={handleFileChange}
                     className="hidden"
                 />
-                <div className="sticky left-0 top-15 h-fit w-20 flex flex-col items-center py-8 z-50 space-y-6">
+                <div className="sticky left-0 top-15 h-fit sm:w-20 w-15 flex flex-col items-center py-8 z-50 space-y-6">
                     {/* File Upload */}
                     <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
-                        <div className="rounded-full hover:bg-red-200 transition p-2 bg-white">
-                        <BookIcon className={"w-7 h-7 fill-black"}/>
+                        <div className={`rounded-full transition p-2 ${file ? "bg-blue-500 hover:bg-blue-700" : "hover:bg-blue-200"}`}>
+                            <BookIcon className={`w-7 h-7 ${file ? "stroke-white" : "stroke-black"}`}/>
                         </div>
                         <input
                             id="file-upload"
@@ -56,32 +56,34 @@ export const ReadPDF = () => {
                             onChange={handleFileChange}
                             className="hidden"
                         />
-                    {!file && <p className="absolute left-20 w-96">Поки що імпортуй .txt файл :)</p>}
+                    {!file && <p className="absolute left-20 w-96">Поки що імпортуй .txt файл руцями :)</p>}
                     </label>
                     {/* Drawing Toggle */}
                     <button
                         onClick={() => setIsDrawingEnabled((prev) => !prev)}
-                        className={`cursor-pointer p-2 rounded-full hover:bg-blue-200 transition ${isDrawingEnabled ? "bg-blue-500 text-white" : "bg-white text-blue-500"}`}
+                        className={`p-2 rounded-full transition ${isDrawingEnabled ? "bg-blue-500 text-white" : "bg-white text-blue-500"} ${!file ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-blue-200"}`}
                         title="Toggle Drawing"
+                        disabled={!file}
                     >
                         <BrushIcon className={`w-7 h-7 ${isDrawingEnabled ? "fill-white" : "fill-blue-500"}`} />
                     </button>
                     {/* Eraser Toggle */}
                     <button
                         onClick={() => setIsErasing((prev) => !prev)}
-                        className={`cursor-pointer p-2 rounded-full hover:bg-blue-200 transition ${isErasing ? "bg-blue-500 text-white" : "bg-white text-blue-500"}`}
+                        className={`p-2 rounded-full transition ${isErasing ? "bg-blue-500 text-white" : "bg-white text-blue-500"} ${!isDrawingEnabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-blue-200"}`}
                         title="Toggle Eraser"
+                        disabled={!isDrawingEnabled}
                     >
                         <EraserIcon className={`w-7 h-7 ${isErasing ? "stroke-white" : "stroke-blue-500"}`} />
                     </button>
                     {/* Color Picker */}
-                    <label className="cursor-pointer flex flex-col items-center">
+                    <label className={`flex flex-col items-center ${isErasing || !isDrawingEnabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
                         <ColorIcon className={`w-7 h-7`} color={ color} />
                         <input
                             type="color"
                             value={color}
                             onChange={(e) => setColor(e.target.value)}
-                            disabled={isErasing}
+                            disabled={isErasing || !isDrawingEnabled}
                             className="opacity-0 w-0 h-0"
                             tabIndex={-1}
                         />
@@ -93,19 +95,21 @@ export const ReadPDF = () => {
                         </svg>
                         <input
                             type="range"
-                            min="1"
+                            min="2"
                             max="24"
                             value={brushSize}
                             onChange={(e) => setBrushSize(Number(e.target.value))}
-                            className="cursor-pointer h-24 w-4 mt-2 accent-blue-500 [writing-mode:vertical-lr] [direction:rtl]"
+                            className={`h-24 w-4 mt-2 accent-blue-500 [writing-mode:vertical-lr] [direction:rtl] ${!isDrawingEnabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                             orient="vertical"
+                            disabled={!isDrawingEnabled}
                         />
                     </div>
                     {/* Shared Mode */}
                     <button
                         onClick={() => setIsSharedMode((prev) => !prev)}
-                        className={`cursor-pointer p-2 rounded-full hover:bg-green-200 transition ${isSharedMode ? "bg-green-500 text-white" : "bg-white text-green-500"}`}
+                        className={`p-2 rounded-full transition ${isSharedMode ? "bg-green-500 text-white" : "bg-white text-green-500"} ${!file ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-green-200"}`}
                         title="Toggle Shared Mode"
+                        disabled={!file}
                     >
                         <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <circle cx="12" cy="8" r="4" />
@@ -115,38 +119,44 @@ export const ReadPDF = () => {
                     {/* Text to Speech */}
                     <button
                         onClick={() => setIsTextToSpeechEnabled((prev) => !prev)}
-                        className={`cursor-pointer p-2 rounded-full hover:bg-purple-200 transition ${isTextToSpeechEnabled ? "bg-purple-500 text-white" : "bg-white text-purple-500"}`}
+                        className={`p-2 rounded-full transition ${isTextToSpeechEnabled ? "bg-purple-500 text-white" : "bg-white text-purple-500"} ${!file || isVoiceTrackingEnabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-purple-200"}`}
                         title="Toggle Text to Speech"
+                        disabled={!file || isVoiceTrackingEnabled}
                     >
                         <SoundIcon className={`w-7 h-7 ${isTextToSpeechEnabled ? "fill-white" : "fill-purple-500"}`} />
                     </button>
                     {/* Voice Tracking */}
                     <button
                         onClick={() => setIsVoiceTrackingEnabled((prev) => !prev)}
-                        className={`cursor-pointer p-2 rounded-full hover:bg-orange-200 transition ${isVoiceTrackingEnabled ? "bg-orange-500 text-white" : "bg-white text-orange-500"}`}
+                        className={`p-2 rounded-full transition ${isVoiceTrackingEnabled ? "bg-orange-500 text-white" : "bg-white text-orange-500"} ${!file || isTextToSpeechEnabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-orange-200"}`}
                         title="Toggle Voice Tracking"
+                        disabled={!file || isTextToSpeechEnabled}
                     >
                         <MicroIcon className={`w-7 h-7 ${isVoiceTrackingEnabled ? "stroke-white" : "stroke-orange-500"}`} />
                     </button>
                 </div>
             </div>
+            <div className="sm:p-4 p-2">
             {file && (
                 <div className="relative w-full h-full shadow-xl rounded overflow-hidden bg-white">
+                    <div className={`relative ${isDrawingEnabled ? "z-1" : "z-10"} h-full`}>
+                        <PdfViewer
+                            file={file}
+                            fileData={fileData}
+                            isSharedMode={isSharedMode}
+                            isTextToSpeechEnabled={isTextToSpeechEnabled}
+                            isVoiceTrackingEnabled={isVoiceTrackingEnabled}
+                            />
+                        </div>
                     <DrawingLayer
                         isEnabled={isDrawingEnabled}
                         color={color}
                         isErasing={isErasing}
                         brushSize={brushSize}
                     />
-                    <PdfViewer
-                        file={file}
-                        fileData={fileData}
-                        isSharedMode={isSharedMode}
-                        isTextToSpeechEnabled={isTextToSpeechEnabled}
-                        isVoiceTrackingEnabled={isVoiceTrackingEnabled}
-                    />
                 </div>
             )}
+            </div>
         </div>
     );
 };

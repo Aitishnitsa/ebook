@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export const PdfViewer = ({ file, fileData, isSharedMode, isTextToSpeechEnabled }) => {
+export const PdfViewer = ({ file, fileData, isSharedMode, isTextToSpeechEnabled, isVoiceTrackingEnabled }) => {
     const [text, setText] = useState("");
     const [spokenWordIndex, setSpokenWordIndex] = useState(-1); // Індекс поточного слова
     const [lastSpokenIndex, setLastSpokenIndex] = useState(-1);
@@ -19,6 +19,8 @@ export const PdfViewer = ({ file, fileData, isSharedMode, isTextToSpeechEnabled 
     }, [isTextToSpeechEnabled, text]);
 
     useEffect(() => {
+        if (!isVoiceTrackingEnabled) return;
+
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.continuous = true;
         recognition.interimResults = true;
@@ -39,7 +41,7 @@ export const PdfViewer = ({ file, fileData, isSharedMode, isTextToSpeechEnabled 
         };
 
         recognition.onerror = (event) => {
-            console.error("Speech recognition error:", event.error);
+            // console.error("Speech recognition error:", event.error);
         };
 
         recognition.start();
@@ -47,7 +49,7 @@ export const PdfViewer = ({ file, fileData, isSharedMode, isTextToSpeechEnabled 
         return () => {
             recognition.stop();
         };
-    }, [text, lastSpokenIndex]);
+    }, [text, lastSpokenIndex, isVoiceTrackingEnabled]);
 
     const getDynamicWordCount = (transcript) => {
         const wordCount = transcript.trim().split(/\s+/).length;
