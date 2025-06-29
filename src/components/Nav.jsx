@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import Logo from './Icons/Logo';
+import { Logout } from './Icons/Logout';
 
 const Nav = ({ isAuth, onLogout }) => {
     const navigate = useNavigate();
@@ -12,16 +14,16 @@ const Nav = ({ isAuth, onLogout }) => {
     };
 
     return (
-        <nav className="bg-gray-800 p-4 flex items-center justify-between">
-            <div className="flex-1">
-                <h1 className="text-white">eBook logo :)</h1>
+        <nav className="bg-coffee-800 px-4 py-2 flex items-center justify-between">
+            <div className="flex-1 cursor-pointer" onClick={() => navigate('/')}>
+                <Logo className={"w-10 h-10"} />
             </div>
             {isAuth && (
                 <ul className="flex flex-1 justify-center list-none m-0 p-0">
                     <li className="mx-3">
                         <button
                             onClick={() => navigate('/')}
-                            className="text-white hover:text-gray-300 bg-transparent border-none cursor-pointer"
+                            className="text-coffee-50 transition duration-300 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
                         >
                             Home
                         </button>
@@ -29,7 +31,7 @@ const Nav = ({ isAuth, onLogout }) => {
                     {/* <li className="mx-3">
                         <button
                             onClick={() => navigate('/admin')}
-                            className="text-white hover:text-gray-300 bg-transparent border-none cursor-pointer"
+                            className="text-coffee-50 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
                         >
                             Admin
                         </button>
@@ -37,7 +39,7 @@ const Nav = ({ isAuth, onLogout }) => {
                     <li className="mx-3">
                         <button
                             onClick={() => navigate('/reader')}
-                            className="text-white hover:text-gray-300 bg-transparent border-none cursor-pointer"
+                            className="text-coffee-50 transition duration-300 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
                         >
                             Reader
                         </button>
@@ -45,7 +47,7 @@ const Nav = ({ isAuth, onLogout }) => {
                     <li className="mx-3">
                         <button
                             onClick={() => navigate('/profile')}
-                            className="text-white hover:text-gray-300 bg-transparent border-none cursor-pointer"
+                            className="text-coffee-50 transition duration-300 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
                         >
                             Profile
                         </button>
@@ -56,9 +58,9 @@ const Nav = ({ isAuth, onLogout }) => {
                 {isAuth && (
                     <button
                         onClick={handleLogout}
-                        className="text-white hover:text-gray-300 bg-transparent border-none cursor-pointer"
+                        className="text-coffee-50 transition duration-300 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
                     >
-                        Logout
+                        <Logout className="w-7 h-7" />
                     </button>
                 )}
             </div>

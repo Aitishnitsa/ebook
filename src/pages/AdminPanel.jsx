@@ -75,17 +75,17 @@ const AdminPanel = () => {
     };
 
     return (
-        <div className="max-w-xl w-full mx-auto p-4 sm:p-6 bg-white rounded shadow mt-6 sm:mt-10">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">Users</h1>
+        <div className="max-w-xl w-full mx-auto p-4 sm:p-6 bg-coffee-50 rounded shadow mt-6 sm:mt-10">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-coffee-900">Users</h1>
             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2 sm:gap-0">
                 <button
-                    className="w-full sm:w-auto cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                    className="w-full sm:w-auto cursor-pointer bg-coffee-600 text-coffee-50 px-4 py-2 rounded hover:bg-coffee-700 transition"
                     onClick={handleGetUserCount}
                 >
                     Get User Count
                 </button>
                 {userCount !== null && (
-                    <div className="text-gray-700 mt-2 sm:mt-0">
+                    <div className="text-coffee-700 mt-2 sm:mt-0">
                         <strong>User Count:</strong> {userCount}
                     </div>
                 )}
@@ -93,7 +93,7 @@ const AdminPanel = () => {
             <ul className="space-y-3 mb-8">
                 {users.map((user) =>
                     editingUser === user.id ? (
-                        <li key={user.id} className="w-full flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 justify-between bg-gray-100 p-2 rounded">
+                        <li key={user.id} className="w-full flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 justify-between bg-coffee-100 p-2 rounded">
                             <input
                                 type="text"
                                 className="border rounded px-2 py-1 w-full sm:w-1/3 flex-1"
@@ -108,7 +108,7 @@ const AdminPanel = () => {
                             />
                             <div className="flex gap-2">
                                 <button
-                                    className="cursor-pointer bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition flex items-center justify-center"
+                                    className="cursor-pointer bg-coffee-500 text-coffee-50 px-3 py-1 rounded hover:bg-coffee-600 transition flex items-center justify-center"
                                     onClick={() => handleUpdateUser(user.id)}
                                     title="Save"
                                 >
@@ -117,7 +117,7 @@ const AdminPanel = () => {
                                     </svg>
                                 </button>
                                 <button
-                                    className="cursor-pointer bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 transition flex items-center justify-center"
+                                    className="cursor-pointer bg-coffee-300 text-coffee-800 px-3 py-1 rounded hover:bg-coffee-400 transition flex items-center justify-center"
                                     onClick={() => setEditingUser(null)}
                                     title="Cancel"
                                 >
@@ -128,13 +128,13 @@ const AdminPanel = () => {
                             </div>
                         </li>
                     ) : (
-                        <li key={user.id} className="flex flex-row items-stretch sm:items-center justify-between bg-gray-50 p-2 rounded space-y-2 sm:space-y-0">
+                        <li key={user.id} className="flex flex-row items-stretch sm:items-center justify-between bg-coffee-50 p-2 rounded space-y-2 sm:space-y-0">
                             <span>
-                                <span className="font-medium">{user.username}</span> <span className="text-gray-500">({user.email})</span>
+                                <span className="font-medium text-coffee-700">{user.username}</span> <span className="text-coffee-500">({user.email})</span>
                             </span>
                             <div className="flex items-center justify-end flex-row gap-2">
                                 <button
-                                    className="cursor-pointer bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 transition flex items-center justify-center"
+                                    className="cursor-pointer bg-coffee-400 text-coffee-50 px-3 py-1 rounded hover:bg-coffee-500 transition flex items-center justify-center"
                                     onClick={() => handleEditClick(user)}
                                     title="Edit"
                                 >
@@ -143,7 +143,7 @@ const AdminPanel = () => {
                                     </svg>
                                 </button>
                                 <button
-                                    className="cursor-pointer bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition flex items-center justify-center"
+                                    className="cursor-pointer bg-coffee-500 text-coffee-50 px-3 py-1 rounded hover:bg-coffee-600 transition flex items-center justify-center"
                                     onClick={() => handleDeleteUser(user.id)}
                                     title="Delete"
                                 >

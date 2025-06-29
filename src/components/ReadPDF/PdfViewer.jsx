@@ -72,9 +72,9 @@ export const PdfViewer = ({ file, fileData, isSharedMode, isTextToSpeechEnabled,
                 <span
                     key={i}
                     className={`cursor-pointer ${i < spokenWordIndex
-                        ? "bg-yellow-100"
+                        ? "bg-coffee-100"
                             : i === spokenWordIndex
-                                ? "bg-yellow-300"
+                                ? "bg-coffee-300"
                                 : ""
                         }`}
                 >

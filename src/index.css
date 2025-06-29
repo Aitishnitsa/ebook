@@ -1,4 +1,36 @@
 @import "tailwindcss";
-body {
-  font-family: 'Montserrat', sans-serif;
+
+@theme {
+  --font-sans: Montserrat, sans-serif;
+
+  --color-coffee-50: #f8f5ee;
+  --color-coffee-100: #ede6d4;
+  --color-coffee-200: #dcccac;
+  --color-coffee-300: #c8ab7c;
+  --color-coffee-400: #b68d54;
+  --color-coffee-500: #a87d4a;
+  --color-coffee-600: #90643e;
+  --color-coffee-700: #744c34;
+  --color-coffee-800: #624031;
+  --color-coffee-900: #55382e;
+  --color-coffee-950: #311c17;
+}
+
+@layer components {
+  .typography {
+    p {
+      font-size: var(--text-base);
+      color: var(--color-gray-700);
+    }
+    h1 {
+      font-size: var(--text-2xl--line-height);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-gray-950);
+    }
+    h2 {
+      font-size: var(--text-xl);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-gray-950);
+    }
+  }
 }

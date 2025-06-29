@@ -11,9 +11,9 @@ const Profile = () => {
     if (!user) return <div className="text-center mt-8">Not logged in</div>;
 
     return (
-        <div className="max-w-sm mx-auto mt-8 p-6 border border-gray-200 rounded-lg bg-white text-center">
-            <h2 className="text-xl font-semibold my-2">{user.username}</h2>
-            <p className="text-gray-500 my-1">{user.email}</p>
+        <div className="max-w-sm mx-auto mt-8 p-6 border border-coffee-200 rounded-lg text-center">
+            <h2 className="text-coffee-900 text-xl font-semibold my-2">{user.username}</h2>
+            <p className="text-coffee-500 my-1">{user.email}</p>
         </div>
     );
 };
