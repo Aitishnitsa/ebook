@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 export const PdfViewer = ({ file, fileData, isSharedMode, isTextToSpeechEnabled, isVoiceTrackingEnabled }) => {
     const [text, setText] = useState("");
-    const [spokenWordIndex, setSpokenWordIndex] = useState(-1); // Індекс поточного слова
+    const [spokenWordIndex, setSpokenWordIndex] = useState(-1);
     const [lastSpokenIndex, setLastSpokenIndex] = useState(-1);
 
     useEffect(() => {
@@ -67,7 +67,7 @@ export const PdfViewer = ({ file, fileData, isSharedMode, isTextToSpeechEnabled,
     };
 
     return (
-        <div className="prose max-w-full p-4 overflow-auto h-full">
+        <div className="prose max-w-full p-4 overflow-y-auto h-full">
             {text?.split(" ").map((word, i) => (
                 <span
                     key={i}

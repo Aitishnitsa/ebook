@@ -7,6 +7,7 @@ import { EraserIcon } from "../Icons/EraserIcon";
 import { SoundIcon } from "../Icons/SoundIcon";
 import { MicroIcon } from "../Icons/MicroIcon";
 import { ColorIcon } from "../Icons/ColorIcon";
+import IconButton from "../Buttons/IconButton";
 
 export const ReadPDF = () => {
     const [file, setFile] = useState(null);
@@ -17,7 +18,7 @@ export const ReadPDF = () => {
     const [brushSize, setBrushSize] = useState(2);
     const [isSharedMode, setIsSharedMode] = useState(false);
     const [isTextToSpeechEnabled, setIsTextToSpeechEnabled] = useState(false);
-    const [isVoiceTrackingEnabled, setIsVoiceTrackingEnabled] = useState(false); // Голосове читання користувача
+    const [isVoiceTrackingEnabled, setIsVoiceTrackingEnabled] = useState(false);
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -43,10 +44,10 @@ export const ReadPDF = () => {
                     onChange={handleFileChange}
                     className="hidden"
                 />
-                <div className="sticky left-0 top-15 h-fit sm:w-20 w-15 flex flex-col items-center py-8 z-50 space-y-6">
+                <div className="sticky left-0 top-15 h-fit sm:w-20 w-15 flex flex-col items-center py-8 z-50 space-y-3">
                     {/* File Upload */}
                     <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
-                        <div className={`rounded-full transition p-2 ${file ? "bg-coffee-500 hover:bg-coffee-700" : "hover:bg-coffee-200"}`}>
+                        <div className={`rounded-full transition p-2 ${file ? "bg-coffee-500 hover:bg-coffee-700" : "bg-coffee-50 hover:bg-coffee-200"}`}>
                             <BookIcon className={`w-7 h-7 ${file ? "stroke-coffee-50" : "stroke-coffee-700"}`}/>
                         </div>
                         <input
@@ -56,28 +57,26 @@ export const ReadPDF = () => {
                             onChange={handleFileChange}
                             className="hidden"
                         />
-                    {!file && <p className="absolute left-20 w-96">Поки що імпортуй .txt файл руцями :)</p>}
+                    {!file && <p className="absolute left-20 w-36">Імпортуй .txt файл руцями :)</p>}
                     </label>
                     {/* Drawing Toggle */}
-                    <button
+                    <IconButton
+                        isActive={isDrawingEnabled}
+                        isDisabled={!file}
                         onClick={() => setIsDrawingEnabled((prev) => !prev)}
-                        className={`p-2 rounded-full transition ${isDrawingEnabled ? "bg-coffee-500 text-coffee-50" : "bg-coffee-50 text-coffee-500"} ${!file ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-coffee-200"}`}
-                        title="Toggle Drawing"
-                        disabled={!file}
-                    >
+                        title="Toggle Drawing">
                         <BrushIcon className={`w-7 h-7 ${isDrawingEnabled ? "fill-coffee-50" : "fill-coffee-700"}`} />
-                    </button>
+                    </IconButton>
                     {/* Eraser Toggle */}
-                    <button
+                    <IconButton
+                        isActive={isErasing}
+                        isDisabled={!isDrawingEnabled}
                         onClick={() => setIsErasing((prev) => !prev)}
-                        className={`p-2 rounded-full transition ${isErasing ? "bg-coffee-500 text-coffee-50" : "bg-coffee-50 text-coffee-500"} ${!isDrawingEnabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-coffee-200"}`}
-                        title="Toggle Eraser"
-                        disabled={!isDrawingEnabled}
-                    >
+                        title="Toggle Eraser">
                         <EraserIcon className={`w-7 h-7 ${isErasing ? "stroke-coffee-50" : "stroke-coffee-700"}`} />
-                    </button>
+                    </IconButton>
                     {/* Color Picker */}
-                    <label className={`p-2 rounded-full flex flex-col items-center ${isErasing || !isDrawingEnabled ? "cursor-not-allowed opacity-50" : "bg-coffee-50 hover:bg-coffee-200 cursor-pointer"}`}>
+                    <label className={`p-2 rounded-full flex flex-col items-center bg-coffee-50 ${isErasing || !isDrawingEnabled ? "cursor-not-allowed opacity-50" : "hover:bg-coffee-200 cursor-pointer"}`}>
                         <ColorIcon className={`w-7 h-7 fill-coffee-700`} color={ color} />
                         <input
                             type="color"
@@ -105,35 +104,32 @@ export const ReadPDF = () => {
                         />
                     </div>
                     {/* Shared Mode */}
-                    <button
+                    <IconButton
+                        isActive={isSharedMode}
+                        isDisabled={!file}
                         onClick={() => setIsSharedMode((prev) => !prev)}
-                        className={`p-2 rounded-full transition ${isSharedMode ? "bg-coffee-500 text-coffee-50" : "bg-coffee-50 text-coffee-700"} ${!file ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-coffee-200"}`}
-                        title="Toggle Shared Mode"
-                        disabled={!file}
-                    >
+                        title="Toggle Shared Mode">
                         <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <circle cx="12" cy="8" r="4" />
                             <path d="M2 20c0-4 4-7 10-7s10 3 10 7" />
                         </svg>
-                    </button>
+                    </IconButton>
                     {/* Text to Speech */}
-                    <button
+                    <IconButton
+                        isActive={isTextToSpeechEnabled}
+                        isDisabled={!file || isVoiceTrackingEnabled}
                         onClick={() => setIsTextToSpeechEnabled((prev) => !prev)}
-                        className={`p-2 rounded-full transition ${isTextToSpeechEnabled ? "bg-coffee-500 text-coffee-50" : "bg-coffee-50 text-coffee-500"} ${!file || isVoiceTrackingEnabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-coffee-200"}`}
-                        title="Toggle Text to Speech"
-                        disabled={!file || isVoiceTrackingEnabled}
-                    >
+                        title="Toggle Text to Speech">
                         <SoundIcon className={`w-7 h-7 ${isTextToSpeechEnabled ? "fill-coffee-50" : "fill-coffee-700"}`} />
-                    </button>
+                    </IconButton>
                     {/* Voice Tracking */}
-                    <button
+                    <IconButton
+                        isActive={isVoiceTrackingEnabled}
+                        isDisabled={!file || isTextToSpeechEnabled}
                         onClick={() => setIsVoiceTrackingEnabled((prev) => !prev)}
-                        className={`p-2 rounded-full transition ${isVoiceTrackingEnabled ? "bg-coffee-500 text-coffee-50" : "bg-coffee-50 text-coffee-500"} ${!file || isTextToSpeechEnabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-coffee-200"}`}
-                        title="Toggle Voice Tracking"
-                        disabled={!file || isTextToSpeechEnabled}
-                    >
+                        title="Toggle Voice Tracking">
                         <MicroIcon className={`w-7 h-7 ${isVoiceTrackingEnabled ? "stroke-coffee-50" : "stroke-coffee-700"}`} />
-                    </button>
+                    </IconButton>
                 </div>
             </div>
             <div className="sm:p-4 p-2">

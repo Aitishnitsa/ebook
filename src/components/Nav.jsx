@@ -14,13 +14,13 @@ const Nav = ({ isAuth, onLogout }) => {
     };
 
     return (
-        <nav className="bg-coffee-800 px-4 py-2 flex items-center justify-between">
+        <nav className="bg-coffee-800 px-4 py-2 flex items-center justify-between h-14">
             <div className="flex-1 cursor-pointer" onClick={() => navigate('/')}>
                 <Logo className={"w-10 h-10"} />
             </div>
             {isAuth && (
-                <ul className="flex flex-1 justify-center list-none m-0 p-0">
-                    <li className="mx-3">
+                <ul className="flex flex-1 justify-center list-none space-x-5 p-0">
+                    <li>
                         <button
                             onClick={() => navigate('/')}
                             className="text-coffee-50 transition duration-300 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
@@ -36,7 +36,7 @@ const Nav = ({ isAuth, onLogout }) => {
                             Admin
                         </button>
                     </li> */}
-                    <li className="mx-3">
+                    <li>
                         <button
                             onClick={() => navigate('/reader')}
                             className="text-coffee-50 transition duration-300 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
@@ -44,7 +44,7 @@ const Nav = ({ isAuth, onLogout }) => {
                             Reader
                         </button>
                     </li>
-                    <li className="mx-3">
+                    <li>
                         <button
                             onClick={() => navigate('/profile')}
                             className="text-coffee-50 transition duration-300 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
