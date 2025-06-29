@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import Logo from './Icons/Logo';
 import { Logout } from './Icons/Logout';
+import { useAuth } from '../hooks/useAuth';
 
 const Nav = ({ isAuth, onLogout }) => {
     const navigate = useNavigate();
+    const {user} = useAuth();
+    const isAdmin = isAuth && (user.username === "aitishnitsa" || user.username === "DimaLoading");
 
     const handleLogout = () => {
         localStorage.removeItem('access_token');
@@ -19,23 +22,31 @@ const Nav = ({ isAuth, onLogout }) => {
                 <Logo className={"w-10 h-10"} />
             </div>
             {isAuth && (
-                <ul className="flex flex-1 justify-center list-none space-x-5 p-0">
-                    <li>
+                <ul className="flex flex-1 justify-center list-none space-x-2 sm:space-x-5 p-0">
+                    {/* <li>
                         <button
                             onClick={() => navigate('/')}
                             className="text-coffee-50 transition duration-300 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
                         >
                             Home
                         </button>
-                    </li>
-                    {/* <li className="mx-3">
+                    </li> */}
+                    {isAdmin && <li>
                         <button
                             onClick={() => navigate('/admin')}
-                            className="text-coffee-50 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
+                            className="text-coffee-50 transition duration-300 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
                         >
                             Admin
                         </button>
-                    </li> */}
+                    </li>}
+                    <li>
+                        <button
+                            onClick={() => navigate('/friends')}
+                            className="text-coffee-50 hover:text-coffee-200 bg-transparent border-none cursor-pointer"
+                        >
+                            Friends
+                        </button>
+                    </li>
                     <li>
                         <button
                             onClick={() => navigate('/reader')}

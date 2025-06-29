@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axiosInstance';
+import useApi from "../hooks/useApi";
 
 const AdminPanel = () => {
     const [users, setUsers] = useState([]);
@@ -8,19 +9,20 @@ const AdminPanel = () => {
     const [editEmail, setEditEmail] = useState('');
     const [userCount, setUserCount] = useState(null);  
 
+    const { data, error, loading, request } = useApi();
+
     useEffect(() => {
         const cachedUsers = localStorage.getItem('users');
         if (cachedUsers) {
             setUsers(JSON.parse(cachedUsers));
         }
-        api
-            .get('/users')
-            .then((response) => {
-                setUsers(response.data);
-                localStorage.setItem('users', JSON.stringify(response.data));
+        request('get', '/users')
+            .then((usersData) => {
+                setUsers(usersData);
+                localStorage.setItem('users', JSON.stringify(usersData));
             })
-            .catch((error) => {
-                console.error('Error fetching users:', error);
+            .catch((err) => {
+                console.error('Error fetching users:', err);
             });
     }, []);
 
@@ -30,48 +32,42 @@ const AdminPanel = () => {
         setEditEmail(user.email);
     };
 
-    const handleUpdateUser = (userId) => {
+    const handleUpdateUser = async (userId) => {
         const updatedUser = { id: userId, username: editUsername, email: editEmail };
-        api
-            .put(`/users/${userId}`, updatedUser)
-            .then((response) => {
-                setUsers((prevUsers) => {
-                    const updatedUsers = prevUsers.map((u) => (u.id === userId ? response.data : u));
-                    localStorage.setItem('users', JSON.stringify(updatedUsers));
-                    return updatedUsers;
-                });
-                setEditingUser(null);
-            })
-            .catch((error) => {
-                console.error('Error updating user:', error);
+        try {
+            const updated = await request('put', `/users/${userId}`, { data: updatedUser });
+            setUsers((prevUsers) => {
+                const updatedUsers = prevUsers.map((u) => (u.id === userId ? updated : u));
+                localStorage.setItem('users', JSON.stringify(updatedUsers));
+                return updatedUsers;
             });
+            setEditingUser(null);
+        } catch (err) {
+            console.error('Error updating user:', err);
+        }
     };
 
-    const handleDeleteUser = (userId) => {
-        api
-            .delete(`/users/${userId}`)
-            .then(() => {
-                setUsers((prevUsers) => {
-                    const updatedUsers = prevUsers.filter((u) => u.id !== userId);
-                    localStorage.setItem('users', JSON.stringify(updatedUsers));
-                    return updatedUsers;
-                });
-            })
-            .catch((error) => {
-                console.error('Error deleting user:', error);
+    const handleDeleteUser = async (userId) => {
+        try {
+            await request('delete', `/users/${userId}`);
+            setUsers((prevUsers) => {
+                const updatedUsers = prevUsers.filter((u) => u.id !== userId);
+                localStorage.setItem('users', JSON.stringify(updatedUsers));
+                return updatedUsers;
             });
+        } catch (err) {
+            console.error('Error deleting user:', err);
+        }
     };
 
-    const handleGetUserCount = () => {
-        api
-            .get('/users/count')
-            .then((response) => {
-                setUserCount(response.data.count);
-            })
-            .catch((error) => {
-                console.error('Error fetching user count:', error);
-                setUserCount('Error');
-            });
+    const handleGetUserCount = async () => {
+        try {
+            const result = await request('get', '/users/count');
+            setUserCount(result.count);
+        } catch (err) {
+            console.error('Error fetching user count:', err);
+            setUserCount('Error');
+        }
     };
 
     return (

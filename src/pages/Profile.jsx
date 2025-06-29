@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { EyeIcon } from '../components/Icons/EyeIcon';
-import api from '../api/axiosInstance';
 import Button from '../components/Buttons/Button';
 import { BrushIcon } from '../components/Icons/BrushIcon';
+import FriendsList from '../components/FriendsList';
+import useApi from '../hooks/useApi';
 
 const Profile = () => {
     const [user, setUser] = useState(null);
@@ -11,6 +12,7 @@ const Profile = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const { request: apiRequest } = useApi();
 
     useEffect(() => {
         const stored = localStorage.getItem('user');
@@ -41,16 +43,21 @@ const Profile = () => {
         setLoading(true);
         setError('');
         try {
-            const res = await api.put('/me', {
-                username: form.username,
-                password: form.password || undefined,
+            const updated = await apiRequest('put', '/me', {
+                data: {
+                    username: form.username,
+                    password: form.password || undefined,
+                },
             });
-            const updated = res.data;
             setUser(updated);
             localStorage.setItem('user', JSON.stringify(updated));
             setEditMode(false);
         } catch (err) {
-            setError(err.message);
+            setError(
+                err.response?.data?.detail ||
+                err.message ||
+                'Unknown error'
+            );
         } finally {
             setLoading(false);
         }
@@ -115,6 +122,7 @@ const Profile = () => {
                     <section>
                         <h2 className="text-coffee-900 text-xl font-semibold">{user.username}</h2>
                         <p className="text-coffee-500">{user.email}</p>
+                        <FriendsList />
                     </section>
                     <Button
                         onClick={handleEdit}

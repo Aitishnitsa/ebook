@@ -5,6 +5,7 @@ import Auth from './pages/Auth';
 import Profile from './pages/Profile';
 import Nav from './components/Nav';
 import Reader from './pages/Reader';
+import FindFriends from './pages/FindFriends';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -37,13 +38,22 @@ function App() {
             }
           />
           <Route
-            path="/"
+            path="/admin"
             element={
               <ProtectedRoute>
                 <AdminPanel />
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/friends" element={<FindFriends />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </HashRouter>
