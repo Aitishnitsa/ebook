@@ -18,7 +18,6 @@ const FindFriends = () => {
         const fetchUsers = async () => {
             try {
                 const allUsers = await request("get", "/users");
-                // Відфільтрувати самого себе
                 const otherUsers = allUsers.filter(u => u.id !== user.id);
                 setUsers(otherUsers);
                 setFilteredUsers(otherUsers);

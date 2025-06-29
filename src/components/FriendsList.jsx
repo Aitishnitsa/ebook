@@ -1,18 +1,24 @@
 import { useEffect, useState } from "react";
 import useApi from '../hooks/useApi';
+import Button from "./Buttons/Button";
+import { AcceptIcon } from "./Icons/AcceptIcon";
+import { CancelIcon } from "./Icons/CancelIcon";
 
 const FriendsList = () => {
     const [friends, setFriends] = useState([]);
     const [pending, setPending] = useState([]);
+    const [users, setUsers] = useState([]);
     const [error, setError] = useState("");
 
     const { data: friendsData, error: friendsError, request: requestFriends } = useApi();
     const { data: pendingData, error: pendingError, request: requestPending } = useApi();
     const { error: respondError, request: requestRespond } = useApi();
+    const { request: requestUsers } = useApi();
 
     useEffect(() => {
         requestFriends("get", "/friends/");
         requestPending("get", "/friends/requests");
+        requestUsers("get", "/users").then(data => setUsers(data || []));
     }, []);
 
     useEffect(() => {
@@ -27,13 +33,18 @@ const FriendsList = () => {
         else setError("");
     }, [friendsError, pendingError, respondError]);
 
+    const getUsername = (userId) => {
+        const user = users.find(u => u.id === userId);
+        return user ? user.username : `ID: ${userId}`;
+    };
+
     const respondRequest = async (request_id, accept) => {
         try {
             await requestRespond("post", `/friends/request/${request_id}/respond?accept=${accept}`);
-            setPending(prev => prev.filter(r => r.id !== request_id));
             if (accept) {
                 await requestFriends("get", "/friends/");
             }
+            await requestPending("get", "/friends/requests");
         } catch {
             // error handled by useApi
         }
@@ -42,25 +53,36 @@ const FriendsList = () => {
     return (
         <div className="flex flex-col max-w-sm mx-auto mt-8 space-y-4 text-coffee-500">
             <div>
-            <h3 className="font-semibold text-coffee-800">Друзі</h3>
-            {friends.length === 0 && <div>Немає друзів :(</div>}
-            <ul>
-                {friends.map(f => (
-                    <li key={f.id} className="mb-1">ID: {f.to_user_id === f.from_user_id ? f.to_user_id : (f.to_user_id || f.from_user_id)}</li>
-                ))}
+                <h3 className="font-semibold text-coffee-800">Друзі</h3>
+                {friends.length === 0 && <div>Немає друзів :(</div>}
+                <ul>
+                    {friends.map(f => {
+                        const friendId = f.to_user_id === f.from_user_id ? f.from_user_id : f.to_user_id;
+                        return (
+                            <li key={f.id} className="mb-1">
+                                {getUsername(friendId)}
+                            </li>
+                        );
+                    })}
                 </ul>
             </div>
             <div>
-            <h4 className="font-semibold text-coffee-800">Вхідні запити</h4>
-            {pending.length === 0 && <div>Немає запитів</div>}
-            <ul>
-                {pending.map(r => (
-                    <li key={r.id} className="mb-2 flex items-center gap-2">
-                        Запит від користувача ID: {r.from_user_id}
-                        <button className="px-2 py-1 bg-green-200 rounded" onClick={() => respondRequest(r.id, true)}>Прийняти</button>
-                        <button className="px-2 py-1 bg-red-200 rounded" onClick={() => respondRequest(r.id, false)}>Відхилити</button>
+                <h4 className="font-semibold text-coffee-800">Вхідні запити</h4>
+                {pending.length === 0 && <div>Немає запитів</div>}
+                <ul className="flex flex-col space-y-2 w-full">
+                    {pending.map(r => (
+                    <li key={r.id} className="mb-2 w-full flex items-center justify-between gap-2 p-2 border border-coffee-300 rounded">
+                            <b>{getUsername(r.from_user_id)}</b>
+                        <div className="flex gap-2">
+                            <Button onClick={() => respondRequest(r.id, true)}>
+                                <AcceptIcon className="w-5 h-5 stroke-coffee-50" />
+                            </Button>
+                            <Button onClick={() => respondRequest(r.id, false)} className="bg-coffee-300">
+                                <CancelIcon className="w-5 h-5 stroke-coffee-50" />
+                            </Button>
+                        </div>
                     </li>
-                ))}
+                    ))}
                 </ul>
             </div>
             {error && <div className="text-red-500">{error}</div>}

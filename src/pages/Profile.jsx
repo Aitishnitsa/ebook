@@ -118,11 +118,11 @@ const Profile = () => {
                     </div>
                 </form>
             ) : (
+                    <>
                 <div className="flex flex-row items-start justify-between">
                     <section>
                         <h2 className="text-coffee-900 text-xl font-semibold">{user.username}</h2>
                         <p className="text-coffee-500">{user.email}</p>
-                        <FriendsList />
                     </section>
                     <Button
                         onClick={handleEdit}
@@ -130,7 +130,8 @@ const Profile = () => {
                         <BrushIcon className="w-5 h-5 fill-coffee-50" />
                     </Button>
                 </div>
-            )}
+                        <FriendsList />
+                </>)}
         </div>
     );
 };
