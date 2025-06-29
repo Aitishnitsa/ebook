@@ -18,15 +18,29 @@ const FindFriends = () => {
         const fetchUsers = async () => {
             try {
                 const allUsers = await request("get", "/users");
-                const otherUsers = allUsers.filter(u => u.id !== user.id);
+                const friends = user.friends || [];
+                const friendIds = friends.map(f => f.id);
+
+                const outgoingRequests = user.outgoingRequests || [];
+                const outgoingIds = outgoingRequests.map(u => u.id);
+
+                const otherUsers = allUsers
+                    .filter(u => u.id !== user.id && !friendIds.includes(u.id))
+                    .map(u => ({
+                        ...u,
+                        requestSent: outgoingIds.includes(u.id)
+                    }));
+
                 setUsers(otherUsers);
                 setFilteredUsers(otherUsers);
-            } catch {
+            } catch (e) {
                 setMsg("Не вдалося завантажити користувачів");
             }
         };
-        fetchUsers();
-    }, [user, request]);
+        if (user && user.id) {
+            fetchUsers();
+        }
+    }, [user?.id, request]);
 
     useEffect(() => {
         if (!username) {
@@ -40,10 +54,15 @@ const FindFriends = () => {
         }
     }, [username, users]);
 
-    const handleSendRequest = async (toUserId) => {
+    const handleSendRequest = async (friendId) => {
         try {
-            await request("post", "/friends/request", { data: { to_user_id: toUserId } });
+            await request("post", "/friends/request", { friend_id: friendId });
             setMsg("Запит надіслано!");
+            setUsers(users =>
+                users.map(u =>
+                    u.id === friendId ? { ...u, requestSent: true } : u
+                )
+            );
         } catch {
             setMsg("Не вдалося надіслати запит");
         }
@@ -70,12 +89,16 @@ const FindFriends = () => {
                             <span><b>{u.username}</b></span>
                             <span>{u.email}</span>
                         </div>
-                        <Button
-                            onClick={() => handleSendRequest(u.id)}
-                            className="bg-coffee-600 text-white px-3 py-1 rounded mt-2"
-                        >
-                            <PlusIcon className="w-5 h-5 fill-coffee-50" />
-                        </Button>
+                        {u.requestSent ? (
+                            <span className="text-coffee-500">Запит надіслано</span>
+                        ) : (
+                            <Button
+                                onClick={() => handleSendRequest(u.id)}
+                                className="bg-coffee-600 text-white px-3 py-1 rounded mt-2"
+                            >
+                                <PlusIcon className="w-5 h-5 fill-coffee-50" />
+                            </Button>
+                        )}
                     </div>
                 ))}
             </div>
