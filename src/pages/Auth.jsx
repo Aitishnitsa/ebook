@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/axiosInstance';
+import useApi from '../hooks/useApi';
+import { useAuth } from '../hooks/useAuth';
 import { EyeIcon } from '../components/Icons/EyeIcon';
 
-function Auth({ onAuth }) {
+const Auth = ({ onAuth }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -13,6 +14,9 @@ function Auth({ onAuth }) {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+  const { request } = useApi();
+  const { updateUser } = useAuth();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -20,34 +24,53 @@ function Auth({ onAuth }) {
 
     try {
       if (isRegistering) {
-        const response = await api.post('/register', {
-          username,
-          email,
-          password,
+        // 1. Реєстрація
+        await request('post', '/register', {
+          data: { username, email, password },
         });
-        setSuccess(true);
-        localStorage.setItem('user', JSON.stringify(response.data));
-        onAuth && onAuth(response.data);
-        setIsRegistering(false);
-        setPassword('');
-        setError('');
-      } else {
+        // 2. Логін після реєстрації
         const params = new URLSearchParams();
         params.append('grant_type', 'password');
         params.append('username', username);
         params.append('password', password);
-        const response = await api.post('/token', params, {
+        const loginResponse = await request('post', '/token', {
+          data: params,
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         });
-        const { access_token, refresh_token } = response.data;
+        const { access_token, refresh_token } = loginResponse;
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
-        const userResponse = await api.get('/users/me', {
+
+        // 3. Отримати профіль користувача
+        const userResponse = await request('get', '/users/me', {
           headers: { Authorization: `Bearer ${access_token}` },
         });
-        localStorage.setItem('user', JSON.stringify(userResponse.data));
+        localStorage.setItem('user', JSON.stringify(userResponse));
+        updateUser(userResponse);
         setSuccess(true);
-        onAuth && onAuth(userResponse.data);
+        onAuth && onAuth(userResponse);
+        navigate('/profile');
+      } else {
+        // Логін
+        const params = new URLSearchParams();
+        params.append('grant_type', 'password');
+        params.append('username', username);
+        params.append('password', password);
+        const loginResponse = await request('post', '/token', {
+          data: params,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        });
+        const { access_token, refresh_token } = loginResponse;
+        localStorage.setItem('access_token', access_token);
+        localStorage.setItem('refresh_token', refresh_token);
+
+        const userResponse = await request('get', '/users/me', {
+          headers: { Authorization: `Bearer ${access_token}` },
+        });
+        localStorage.setItem('user', JSON.stringify(userResponse));
+        updateUser(userResponse);
+        setSuccess(true);
+        onAuth && onAuth(userResponse);
         navigate('/profile');
       }
     } catch (err) {
@@ -80,7 +103,7 @@ function Auth({ onAuth }) {
       {success && (
         <div className="mb-3 text-green-600 text-center">
           {isRegistering
-            ? 'Registration successful! Please login.'
+            ? 'Registration successful! Redirecting...'
             : 'Login successful! Redirecting...'}
         </div>
       )}
@@ -141,5 +164,4 @@ function Auth({ onAuth }) {
     </form>
   );
 }
-
 export default Auth;

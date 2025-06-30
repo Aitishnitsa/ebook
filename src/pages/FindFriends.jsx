@@ -8,61 +8,91 @@ import { PlusIcon } from "../components/Icons/PlusIcon";
 const FindFriends = () => {
     const [username, setUsername] = useState("");
     const [msg, setMsg] = useState("");
-    const { request, loading } = useApi();
-
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
-    const { user } = useAuth();
+    const [friends, setFriends] = useState([]);
+    const [pending, setPending] = useState([]);
+    const [error, setError] = useState("");
+
+    const { user } = useAuth();    
+    const { request, loading } = useApi();
+    const { request: requestFriends, data: friendsData, error: friendsError } = useApi();
+    const { request: requestPending, data: pendingData, error: pendingError } = useApi();
+    const { request: requestUsers } = useApi();
+
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const allUsers = await request("get", "/users");
-                const friends = user.friends || [];
-                const friendIds = friends.map(f => f.id);
+        if (!user) return;
+        requestFriends("get", "/friends/");
+        requestPending("get", "/friends/requests");
+        requestUsers("get", "/users").then(data => setUsers(data || []));
+    }, []);
 
-                const outgoingRequests = user.outgoingRequests || [];
-                const outgoingIds = outgoingRequests.map(u => u.id);
+    useEffect(() => {
+        if (friendsData) setFriends(friendsData);
+        if (pendingData) setPending(pendingData);
+    }, [friendsData, pendingData]);
 
-                const otherUsers = allUsers
-                    .filter(u => u.id !== user.id && !friendIds.includes(u.id))
-                    .map(u => ({
-                        ...u,
-                        requestSent: outgoingIds.includes(u.id)
-                    }));
+    useEffect(() => {
+        if (friendsError) setError("Не вдалося завантажити друзів");
+        else if (pendingError) setError("Не вдалося завантажити запити");
+        else setError("");
+    }, [friendsError, pendingError]);
 
-                setUsers(otherUsers);
-                setFilteredUsers(otherUsers);
-            } catch (e) {
-                setMsg("Не вдалося завантажити користувачів");
-            }
-        };
-        if (user && user.id) {
-            fetchUsers();
+    useEffect(() => {
+        if (!users.length || !user) {
+            setFilteredUsers([]);
+            return;
         }
-    }, [user?.id, request]);
+        const friendIds = friends.map(f => f.id);
+        const pendingIds = pending.map(r => r.to_user?.id || r.to_user);
+        const filtered = users
+            .filter(u =>
+                u.id !== user.id &&
+                !friendIds.includes(u.id) &&
+                !pendingIds.includes(u.id)
+            )
+            .map(u => ({
+                ...u,
+                requestSent: pendingIds.includes(u.id),
+                isFriend: friendIds.includes(u.id)
+            }));
+        setFilteredUsers(filtered);
+    }, [users, friends, pending, user]);
 
     useEffect(() => {
         if (!username) {
-            setFilteredUsers(users);
+            setFilteredUsers(prev =>
+                prev.length ? prev : users.map(u => ({
+                    ...u,
+                    isFriend: friends.map(f => f.id).includes(u.id),
+                    requestSent: pending.map(r => r.to_user?.id || r.to_user).includes(u.id)
+                }))
+            );
         } else {
             setFilteredUsers(
-                users.filter(u =>
-                    u.username.toLowerCase().includes(username.toLowerCase())
-                )
+                users
+                    .filter(u =>
+                        u.id !== user.id &&
+                        u.username.toLowerCase().includes(username.toLowerCase())
+                    )
+                    .map(u => ({
+                        ...u,
+                        isFriend: friends.map(f => f.id).includes(u.id),
+                        requestSent: pending.map(r => r.to_user?.id || r.to_user).includes(u.id)
+                    }))
+                    .filter(u =>
+                        !u.isFriend && !u.requestSent
+                    )
             );
         }
-    }, [username, users]);
+    }, [username, users, friends, pending, user]);
 
     const handleSendRequest = async (friendId) => {
         try {
             await request("post", "/friends/request", { friend_id: friendId });
             setMsg("Запит надіслано!");
-            setUsers(users =>
-                users.map(u =>
-                    u.id === friendId ? { ...u, requestSent: true } : u
-                )
-            );
+            await requestPending("get", "/friends/requests");
         } catch {
             setMsg("Не вдалося надіслати запит");
         }
