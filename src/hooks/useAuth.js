@@ -16,6 +16,18 @@ export function useAuth() {
     }
   }, []);
 
+  const logout = useCallback(() => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    setUser(null);
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'user',
+      newValue: null,
+      oldValue: localStorage.getItem('user')
+    }));
+  }, []);
+
   useEffect(() => {
     const handler = () => {
       const u = localStorage.getItem("user");
@@ -25,5 +37,5 @@ export function useAuth() {
     return () => window.removeEventListener("storage", handler);
   }, []);
 
-  return { user, updateUser };
+  return { user, updateUser, logout };
 }

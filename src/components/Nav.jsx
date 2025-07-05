@@ -5,8 +5,8 @@ import { useAuth } from '../hooks/useAuth';
 
 const Nav = ({ isAuth, onLogout }) => {
     const navigate = useNavigate();
-    const {user} = useAuth();
-    const isAdmin = isAuth && (user.username === "aitishnitsa" || user.username === "DimaLoading");
+    const { user } = useAuth();
+    const isAdmin = isAuth && user && (user.username === "aitishnitsa" || user.username === "DimaLoading");
 
     const handleLogout = () => {
         localStorage.removeItem('access_token');

@@ -12,7 +12,11 @@ const logout = () => {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
   localStorage.removeItem('user');
-  window.location.href = '/auth';
+  window.dispatchEvent(new StorageEvent('storage', {
+    key: 'user',
+    newValue: null,
+    oldValue: localStorage.getItem('user')
+  }));
 };
 
 const processQueue = (error, token = null) => {

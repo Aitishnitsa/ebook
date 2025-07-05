@@ -24,7 +24,22 @@ const useApi = () => {
                 setData(response.data);
                 return response.data;
             } catch (err) {
-                setError(err.response?.data?.detail || err.message || "Unknown error");
+                let errorMessage = "Unknown error";
+
+                if (err.response?.data?.detail) {
+                    const detail = err.response.data.detail;
+                    if (typeof detail === 'string') {
+                        errorMessage = detail;
+                    } else if (Array.isArray(detail) && detail.length > 0) {
+                        errorMessage = detail.map(error => error.msg || error.message || 'Validation error').join(', ');
+                    } else if (typeof detail === 'object') {
+                        errorMessage = detail.msg || detail.message || 'Validation error';
+                    }
+                } else if (err.message) {
+                    errorMessage = err.message;
+                }
+
+                setError(errorMessage);
                 throw err;
             } finally {
                 setLoading(false);

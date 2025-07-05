@@ -9,7 +9,7 @@ const AdminPanel = () => {
     const [editEmail, setEditEmail] = useState('');
     const [userCount, setUserCount] = useState(null);  
 
-    const { data, error, loading, request } = useApi();
+    const { request } = useApi();
 
     useEffect(() => {
         const cachedUsers = localStorage.getItem('users');
@@ -126,7 +126,7 @@ const AdminPanel = () => {
                     ) : (
                         <li key={user.id} className="flex flex-row items-stretch sm:items-center justify-between bg-coffee-50 p-2 rounded space-y-2 sm:space-y-0">
                             <span>
-                                <span className="font-medium text-coffee-700">{user.username}</span> <span className="text-coffee-500">({user.email})</span>
+                                    <span className="font-medium text-coffee-950">{user.id}</span> <span className="font-medium text-coffee-700">{user.username}</span> <span className="text-coffee-500">({user.email})</span>
                             </span>
                             <div className="flex items-center justify-end flex-row gap-2">
                                 <button
