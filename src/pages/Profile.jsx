@@ -1,17 +1,40 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../components/Buttons/Button';
 import { BrushIcon } from '../components/Icons/BrushIcon';
 import FriendsList from '../components/FriendsList';
 import { useAuth } from '../hooks/useAuth';
 import EditForm from '../components/profile/EditForm';
+import useApi from '../hooks/useApi';
 
 const Profile = () => {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
+    const { request } = useApi();
     const [editMode, setEditMode] = useState(false);
 
     const handleEdit = () => {
         setEditMode(true);
     };
+
+    useEffect(() => {
+        if (!user) return;
+        const fetchUserData = async () => {
+            try {
+                const userResponse = await request('get', '/users/me');
+                if (userResponse) {
+                    updateUser(userResponse);
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                if (error.response?.status === 401) {
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/ebook/#/auth';
+                }
+            }
+        }
+        fetchUserData();
+    }, [editMode]);
 
     if (!user) return <div className="text-center mt-8">Not logged in</div>;
 

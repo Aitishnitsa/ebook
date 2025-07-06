@@ -85,33 +85,39 @@ const EditForm = ({ setEditMode }) => {
         setError('');
 
         try {
+            const requestBody = {
+                username: form.username
+            };
+            if (form.password) {
+                requestBody.password = form.password;
+            }
+
+            const accessToken = localStorage.getItem('access_token');
             const updated = await apiRequest('put', '/me', {
-                data: {
-                    username: form.username,
-                    password: form.password || undefined,
-                },
+                data: requestBody,
+                headers: { 
+                    'Content-Type': 'application/json',
+                    ...(accessToken && { Authorization: `Bearer ${accessToken}` })
+                }
             });
 
-            if (updated.username !== user.username && form.password) {
+            const usernameChanged = updated.username !== user.username;
+            const passwordChanged = !!form.password;
+
+            if (usernameChanged || passwordChanged) {
+                if (!form.password) {
+                    setError('Щоб змінити ім\'я користувача або пароль, введіть поточний або новий пароль.');
+                    setLoading(false);
+                    return;
+                }
                 try {
                     await performAutoLogin(updated.username, form.password);
                     setEditMode(false);
                 } catch (loginError) {
                     console.error('Auto-login error:', loginError);
                     updateUser(null);
-
-                    let loginErrorMessage = 'Не вдалося автоматично увійти';
-                    if (loginError.response?.data?.detail) {
-                        const detail = loginError.response.data.detail;
-                        if (typeof detail === 'string') {
-                            loginErrorMessage = detail;
-                        }
-                    }
-
-                    window.location.href = '/ebook/auth';
+                    window.location.href = '/ebook/#/auth';
                 }
-            } else if (updated.username !== user.username && !form.password) {
-                setError('Для зміни імені користувача необхідно вказати пароль.');
             } else {
                 updateUser(updated);
                 setEditMode(false);
@@ -231,12 +237,16 @@ const EditForm = ({ setEditMode }) => {
                         </div>
                     )}
                 </div>
-                {error && <div className="text-red-500">{error}</div>}
+                {error && <div className="text-red-500 text-sm">{error}</div>}
                 <div className="flex justify-center gap-2">
                     <Button
                         type="submit"
-                        disabled={loading || !isFormValid()}
-                        className={`${isFormValid() && !loading
+                        disabled={
+                            loading ||
+                            !isFormValid() ||
+                            (form.username === user.username && !form.password)
+                        }
+                        className={`${isFormValid() && !loading && !(form.username === user.username && !form.password)
                             ? 'bg-coffee-600 hover:bg-coffee-700'
                             : 'bg-coffee-400 cursor-not-allowed'
                             }`}
