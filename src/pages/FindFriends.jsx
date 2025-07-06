@@ -14,7 +14,7 @@ const FindFriends = () => {
     const [pending, setPending] = useState([]);
     const [error, setError] = useState("");
 
-    const { user } = useAuth();    
+    const { user } = useAuth();
     const { request, loading } = useApi();
     const { request: requestFriends, data: friendsData, error: friendsError } = useApi();
     const { request: requestPending, data: pendingData, error: pendingError } = useApi();
@@ -90,11 +90,28 @@ const FindFriends = () => {
 
     const handleSendRequest = async (friendId) => {
         try {
-            await request("post", "/friends/request", { friend_id: friendId });
+            await request("post", "/friends/request", {
+                params: { friend_id: friendId }
+            });
             setMsg("Запит надіслано!");
             await requestPending("get", "/friends/requests");
-        } catch {
-            setMsg("Не вдалося надіслати запит");
+        } catch (error) {
+            console.error("Error sending friend request:", error);
+
+            if (error.response?.status === 404) {
+                setMsg("API ендпоінт не знайдено. Можливо, функція не реалізована на сервері.");
+            } else if (error.response?.status === 422) {
+                const detail = error.response?.data?.detail;
+                if (Array.isArray(detail) && detail.length > 0) {
+                    setMsg(`Помилка валідації: ${detail[0].msg}`);
+                } else {
+                    setMsg("Помилка валідації даних. Перевірте правильність параметрів.");
+                }
+            } else if (error.response?.status === 400) {
+                setMsg("Неправильний запит або користувач вже є другом.");
+            } else {
+                setMsg(`Не вдалося надіслати запит: ${error.response?.data?.detail || error.message}`);
+            }
         }
     };
 

@@ -21,10 +21,26 @@ const FriendsList = () => {
 
     useEffect(() => {
         if (!user) return;
-        requestFriends("get", "/friends/");
-        requestPending("get", "/friends/requests");
-        requestUsers("get", "/users").then(data => setUsers(data || []));
-    }, []);
+
+        const loadData = async () => {
+            try {
+                await requestFriends("get", "/friends/");
+                await requestPending("get", "/friends/requests");
+                const usersData = await requestUsers("get", "/users");
+                setUsers(usersData || []);
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    // Токен недійсний, очищуємо дані
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/ebook/auth';
+                }
+            }
+        };
+
+        loadData();
+    }, [user]);
 
     useEffect(() => {
         if (friendsData) setFriends(friendsData);
@@ -93,17 +109,17 @@ const FriendsList = () => {
                 {pending.length === 0 && <div>Немає запитів</div>}
                 <ul className="flex flex-col space-y-2 w-full">
                     {pending.map(r => (
-                    <li key={r.id} className="mb-2 w-full flex items-center justify-between gap-2 p-2 border border-coffee-300 rounded">
+                        <li key={r.id} className="mb-2 w-full flex items-center justify-between gap-2 p-2 border border-coffee-300 rounded">
                             <b>{getUsername(r.from_user_id)}</b>
-                        <div className="flex gap-2">
-                            <Button onClick={() => respondRequest(r.id, true)}>
-                                <AcceptIcon className="w-5 h-5 stroke-coffee-50" />
-                            </Button>
-                            <Button onClick={() => respondRequest(r.id, false)} className="bg-coffee-300">
-                                <CancelIcon className="w-5 h-5 stroke-coffee-50" />
-                            </Button>
-                        </div>
-                    </li>
+                            <div className="flex gap-2">
+                                <Button onClick={() => respondRequest(r.id, true)}>
+                                    <AcceptIcon className="w-5 h-5 stroke-coffee-50" />
+                                </Button>
+                                <Button onClick={() => respondRequest(r.id, false)} className="bg-coffee-300">
+                                    <CancelIcon className="w-5 h-5 stroke-coffee-50" />
+                                </Button>
+                            </div>
+                        </li>
                     ))}
                 </ul>
             </div>

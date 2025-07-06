@@ -1,7 +1,35 @@
 import { useState, useCallback } from 'react';
+import useApi from './useApi';
 
 export const useValidation = () => {
     const [errors, setErrors] = useState({});
+    const [checking, setChecking] = useState({});
+    const { request: apiRequest } = useApi();
+
+    // Функція для перевірки унікальності username/email
+    const checkUserExists = useCallback(async (field, value, currentUserValue = null) => {
+        if (currentUserValue && value === currentUserValue) {
+            return false;
+        }
+
+        try {
+            setChecking(prev => ({ ...prev, [field]: true }));
+            const users = await apiRequest('get', '/users');
+
+            if (field === 'username') {
+                return users.some(u => u.username && u.username.toLowerCase() === value.toLowerCase());
+            } else if (field === 'email') {
+                return users.some(u => u.email && u.email.toLowerCase() === value.toLowerCase());
+            }
+
+            return false;
+        } catch (error) {
+            console.error(`Error checking ${field}:`, error);
+            return false;
+        } finally {
+            setChecking(prev => ({ ...prev, [field]: false }));
+        }
+    }, [apiRequest]);
 
     const validationRules = {
         username: (value) => {
@@ -160,6 +188,7 @@ export const useValidation = () => {
 
     return {
         errors,
+        checking,
         setErrors,
         validationRules,
         validateField,
@@ -169,7 +198,8 @@ export const useValidation = () => {
         isFormValid,
         getFieldErrors,
         hasFieldErrors,
-        addFieldError
+        addFieldError,
+        checkUserExists
     };
 };
 
