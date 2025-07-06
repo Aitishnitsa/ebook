@@ -8,110 +8,44 @@ import { PlusIcon } from "../components/Icons/PlusIcon";
 const FindFriends = () => {
     const [username, setUsername] = useState("");
     const [msg, setMsg] = useState("");
+    const { request, loading } = useApi();
+
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
-    const [friends, setFriends] = useState([]);
-    const [pending, setPending] = useState([]);
-    const [error, setError] = useState("");
-
     const { user } = useAuth();
-    const { request, loading } = useApi();
-    const { request: requestFriends, data: friendsData, error: friendsError } = useApi();
-    const { request: requestPending, data: pendingData, error: pendingError } = useApi();
-    const { request: requestUsers } = useApi();
-
 
     useEffect(() => {
-        if (!user) return;
-        requestFriends("get", "/friends/");
-        requestPending("get", "/friends/requests");
-        requestUsers("get", "/users").then(data => setUsers(data || []));
-    }, []);
-
-    useEffect(() => {
-        if (friendsData) setFriends(friendsData);
-        if (pendingData) setPending(pendingData);
-    }, [friendsData, pendingData]);
-
-    useEffect(() => {
-        if (friendsError) setError("Не вдалося завантажити друзів");
-        else if (pendingError) setError("Не вдалося завантажити запити");
-        else setError("");
-    }, [friendsError, pendingError]);
-
-    useEffect(() => {
-        if (!users.length || !user) {
-            setFilteredUsers([]);
-            return;
-        }
-        const friendIds = friends.map(f => f.id);
-        const pendingIds = pending.map(r => r.to_user?.id || r.to_user);
-        const filtered = users
-            .filter(u =>
-                u.id !== user.id &&
-                !friendIds.includes(u.id) &&
-                !pendingIds.includes(u.id)
-            )
-            .map(u => ({
-                ...u,
-                requestSent: pendingIds.includes(u.id),
-                isFriend: friendIds.includes(u.id)
-            }));
-        setFilteredUsers(filtered);
-    }, [users, friends, pending, user]);
+        const fetchUsers = async () => {
+            try {
+                const allUsers = await request("get", "/users");
+                const otherUsers = allUsers.filter(u => u.id !== user.id);
+                setUsers(otherUsers);
+                setFilteredUsers(otherUsers);
+            } catch {
+                setMsg("Не вдалося завантажити користувачів");
+            }
+        };
+        fetchUsers();
+    }, [user, request]);
 
     useEffect(() => {
         if (!username) {
-            setFilteredUsers(prev =>
-                prev.length ? prev : users.map(u => ({
-                    ...u,
-                    isFriend: friends.map(f => f.id).includes(u.id),
-                    requestSent: pending.map(r => r.to_user?.id || r.to_user).includes(u.id)
-                }))
-            );
+            setFilteredUsers(users);
         } else {
             setFilteredUsers(
-                users
-                    .filter(u =>
-                        u.id !== user.id &&
-                        u.username.toLowerCase().includes(username.toLowerCase())
-                    )
-                    .map(u => ({
-                        ...u,
-                        isFriend: friends.map(f => f.id).includes(u.id),
-                        requestSent: pending.map(r => r.to_user?.id || r.to_user).includes(u.id)
-                    }))
-                    .filter(u =>
-                        !u.isFriend && !u.requestSent
-                    )
+                users.filter(u =>
+                    u.username.toLowerCase().includes(username.toLowerCase())
+                )
             );
         }
-    }, [username, users, friends, pending, user]);
+    }, [username, users]);
 
-    const handleSendRequest = async (friendId) => {
+    const handleSendRequest = async (toUserId) => {
         try {
-            await request("post", "/friends/request", {
-                params: { friend_id: friendId }
-            });
+            await request("post", "/friends/request", { data: { to_user_id: toUserId } });
             setMsg("Запит надіслано!");
-            await requestPending("get", "/friends/requests");
-        } catch (error) {
-            console.error("Error sending friend request:", error);
-
-            if (error.response?.status === 404) {
-                setMsg("API ендпоінт не знайдено. Можливо, функція не реалізована на сервері.");
-            } else if (error.response?.status === 422) {
-                const detail = error.response?.data?.detail;
-                if (Array.isArray(detail) && detail.length > 0) {
-                    setMsg(`Помилка валідації: ${detail[0].msg}`);
-                } else {
-                    setMsg("Помилка валідації даних. Перевірте правильність параметрів.");
-                }
-            } else if (error.response?.status === 400) {
-                setMsg("Неправильний запит або користувач вже є другом.");
-            } else {
-                setMsg(`Не вдалося надіслати запит: ${error.response?.data?.detail || error.message}`);
-            }
+        } catch {
+            setMsg("Не вдалося надіслати запит");
         }
     };
 
@@ -136,16 +70,12 @@ const FindFriends = () => {
                             <span><b>{u.username}</b></span>
                             <span>{u.email}</span>
                         </div>
-                        {u.requestSent ? (
-                            <span className="text-coffee-500">Запит надіслано</span>
-                        ) : (
-                            <Button
-                                onClick={() => handleSendRequest(u.id)}
-                                className="bg-coffee-600 text-white px-3 py-1 rounded mt-2"
-                            >
-                                <PlusIcon className="w-5 h-5 fill-coffee-50" />
-                            </Button>
-                        )}
+                        <Button
+                            onClick={() => handleSendRequest(u.id)}
+                            className="bg-coffee-600 text-white px-3 py-1 rounded mt-2"
+                        >
+                            <PlusIcon className="w-5 h-5 fill-coffee-50" />
+                        </Button>
                     </div>
                 ))}
             </div>
