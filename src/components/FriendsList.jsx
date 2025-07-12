@@ -5,12 +5,14 @@ import { AcceptIcon } from "./Icons/AcceptIcon";
 import { CancelIcon } from "./Icons/CancelIcon";
 import { useAuth } from "../hooks/useAuth";
 import { TrashIcon } from "./Icons/TrashIcon";
+import Loader from "./Loader";
 
 const FriendsList = () => {
     const [friends, setFriends] = useState([]);
     const [pending, setPending] = useState([]);
     const [users, setUsers] = useState([]);
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(true);
 
     const { data: friendsData, error: friendsError, request: requestFriends } = useApi();
     const { data: pendingData, error: pendingError, request: requestPending } = useApi();
@@ -23,6 +25,7 @@ const FriendsList = () => {
         if (!user) return;
 
         const loadData = async () => {
+            setLoading(true);
             try {
                 await requestFriends("get", "/friends/");
                 await requestPending("get", "/friends/requests");
@@ -30,12 +33,13 @@ const FriendsList = () => {
                 setUsers(usersData || []);
             } catch (error) {
                 if (error.response?.status === 401) {
-                    // Токен недійсний, очищуємо дані
                     localStorage.removeItem('access_token');
                     localStorage.removeItem('refresh_token');
                     localStorage.removeItem('user');
                     window.location.href = '/ebook/auth';
                 }
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -68,7 +72,7 @@ const FriendsList = () => {
             }
             await requestPending("get", "/friends/requests");
         } catch {
-            // error handled by useApi
+            // error
         }
     };
 
@@ -77,53 +81,56 @@ const FriendsList = () => {
             await requestDelete("delete", `/friends/${friend_id}`);
             await requestFriends("get", "/friends/");
         } catch {
-            // error handled by useApi
+            // error
         }
     };
 
     return (
         <div className="flex flex-col max-w-sm mx-auto mt-8 space-y-4 text-coffee-500">
-            <div>
-                <h3 className="font-semibold text-coffee-800">Друзі</h3>
-                {friends.length === 0 && <div>Немає друзів :(</div>}
-                <ul>
-                    {friends.map(f => {
-                        const friendId = f.from_user_id === user.id ? f.to_user_id : f.from_user_id;
-                        return (
-                            <li key={f.id} className="mb-1 flex items-center justify-between gap-2">
-                                <span>{getUsername(friendId)}</span>
-                                <Button
-                                    onClick={() => deleteFriend(friendId)}
-                                    className="bg-coffee-300"
-                                    title="Видалити друга"
-                                >
-                                    <TrashIcon className="w-5 h-5 fill-coffee-50" />
-                                </Button>
+            {loading ? <Loader /> : <>
+                <div>
+                    <h3 className="font-semibold text-coffee-800">Друзі</h3>
+                    {friends.length === 0 && <div>Немає друзів :(</div>}
+                    <ul>
+                        {friends.map(f => {
+                            const friendId = f.from_user_id === user.id ? f.to_user_id : f.from_user_id;
+                            return (
+                                <li key={f.id} className="mb-1 flex items-center justify-between gap-2">
+                                    <span>{getUsername(friendId)}</span>
+                                    <Button
+                                        onClick={() => deleteFriend(friendId)}
+                                        className="bg-coffee-300"
+                                        title="Видалити друга"
+                                    >
+                                        <TrashIcon className="w-5 h-5 fill-coffee-50" />
+                                    </Button>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+                <div>
+                    <h4 className="font-semibold text-coffee-800">Вхідні запити</h4>
+                    {pending.length === 0 && <div>Немає запитів</div>}
+                    <ul className="flex flex-col space-y-2 w-full">
+                        {pending.map(r => (
+                            <li key={r.id} className="mb-2 w-full flex items-center justify-between gap-2 p-2 border border-coffee-300 rounded">
+                                <b>{getUsername(r.from_user_id)}</b>
+                                <div className="flex gap-2">
+                                    <Button onClick={() => respondRequest(r.id, true)}>
+                                        <AcceptIcon className="w-5 h-5 stroke-coffee-50" />
+                                    </Button>
+                                    <Button onClick={() => respondRequest(r.id, false)} className="bg-coffee-300">
+                                        <CancelIcon className="w-5 h-5 stroke-coffee-50" />
+                                    </Button>
+                                </div>
                             </li>
-                        );
-                    })}
-                </ul>
-            </div>
-            <div>
-                <h4 className="font-semibold text-coffee-800">Вхідні запити</h4>
-                {pending.length === 0 && <div>Немає запитів</div>}
-                <ul className="flex flex-col space-y-2 w-full">
-                    {pending.map(r => (
-                        <li key={r.id} className="mb-2 w-full flex items-center justify-between gap-2 p-2 border border-coffee-300 rounded">
-                            <b>{getUsername(r.from_user_id)}</b>
-                            <div className="flex gap-2">
-                                <Button onClick={() => respondRequest(r.id, true)}>
-                                    <AcceptIcon className="w-5 h-5 stroke-coffee-50" />
-                                </Button>
-                                <Button onClick={() => respondRequest(r.id, false)} className="bg-coffee-300">
-                                    <CancelIcon className="w-5 h-5 stroke-coffee-50" />
-                                </Button>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-            {error && <div className="text-red-500">{error}</div>}
+                        ))}
+                    </ul>
+                </div>
+                {error && <div className="text-red-500">{error}</div>
+                }
+            </>}
         </div>
     );
 };
